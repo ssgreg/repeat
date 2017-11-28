@@ -20,6 +20,7 @@ func StopOnSuccess() Operation {
 	}
 }
 
+// FnWithErrorAndCounter wraps operation and adds call counter.
 func FnWithErrorAndCounter(op func(error, int) error) Operation {
 	c := 0
 	return func(e error) error {
@@ -28,12 +29,14 @@ func FnWithErrorAndCounter(op func(error, int) error) Operation {
 	}
 }
 
+// FnWithCounter wraps operation with counter only.
 func FnWithCounter(op func(int) error) Operation {
 	return FnWithErrorAndCounter(func(_ error, c int) error {
 		return op(c)
 	})
 }
 
+// Fn wraps operation with no arguments.
 func Fn(op func() error) Operation {
 	return func(_ error) error {
 		return op()
