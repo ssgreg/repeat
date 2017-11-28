@@ -6,7 +6,7 @@
 
 Go implementation of different backoff strategies useful for retrying operations and heartbeating.
 
-## Example
+## Examples
 
 ### Backoff
 
@@ -58,7 +58,7 @@ Repetition process is finished with: <nil>
 
 ### Backoff with timeout
 
-The example below is almost the same as the previous one. It add one important thing - possibility to cancel operation repetition context's timeout.
+The example below is almost the same as the previous one. It adds one important feature - possibility to cancel operation repetition using context's timeout.
 
 ```go
     // A context with cancel.
@@ -93,7 +93,7 @@ Repetition process is finished with: context canceled
 
 ### Heartbeating
 
-Let's imagine we need to periodically report execution progress to remote server. The example below repeats the operation each second until it will be canceled using passed context.
+Let's imagine we need to periodically report execution progress to remote server. The example below repeats the operation each second until it will be cancelled using passed context.
 
 ```go
     // An example operation that do heartbeat.
