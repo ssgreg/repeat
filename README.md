@@ -1,5 +1,6 @@
 # Repeat
 
+![Alt text](https://user-images.githubusercontent.com/1574981/33310621-48c78416-d433-11e7-9a80-36d2381901d0.png "repeat")
 [![GoDoc](https://godoc.org/github.com/ssgreg/repeat?status.svg)](https://godoc.org/github.com/ssgreg/repeat)
 [![Build Status](https://travis-ci.org/ssgreg/repeat.svg?branch=master)](https://travis-ci.org/ssgreg/repeat)
 [![Go Report Status](https://goreportcard.com/badge/github.com/ssgreg/repeat)](https://goreportcard.com/report/github.com/ssgreg/repeat)
