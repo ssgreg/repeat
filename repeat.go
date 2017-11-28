@@ -3,7 +3,7 @@ package repeat
 // Operation is the type of function for repetition.
 type Operation func(error) error
 
-// Repeat repeat operation until one of them stops the repetition.
+// Repeat repeat operations until one of them stops the repetition.
 //
 // It is guaranteed that the first op will be called at least once.
 func Repeat(ops ...Operation) error {
