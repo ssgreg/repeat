@@ -31,7 +31,7 @@ func printInfo(attempt int, last *time.Time) {
 func main() {
 
 	// An example operation that do heartbeat.
-	// It fails 5 times after 3 successfull tries.
+	// It fails 5 times after 3 successful tries.
 	var last time.Time
 	op := func(c int) error {
 		printInfo(c, &last)

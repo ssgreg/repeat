@@ -5,7 +5,7 @@ type Operation func(error) error
 
 // Repeat repeat operation until one of them stops the repetition.
 //
-// It is garanteed that the first op will be called at least once.
+// It is guaranteed that the first op will be called at least once.
 func Repeat(ops ...Operation) error {
 	var err error
 
