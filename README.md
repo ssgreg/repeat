@@ -4,6 +4,7 @@
 [![GoDoc](https://godoc.org/github.com/ssgreg/repeat?status.svg)](https://godoc.org/github.com/ssgreg/repeat)
 [![Build Status](https://travis-ci.org/ssgreg/repeat.svg?branch=master)](https://travis-ci.org/ssgreg/repeat)
 [![Go Report Status](https://goreportcard.com/badge/github.com/ssgreg/repeat)](https://goreportcard.com/report/github.com/ssgreg/repeat)
+[![GoCover](https://gocover.io/_badge/github.com/ssgreg/repeat)](https://gocover.io/github.com/ssgreg/repeat)
 
 Go implementation of different backoff strategies useful for retrying operations and heartbeating.
 
