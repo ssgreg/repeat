@@ -30,26 +30,24 @@ func FixedBackoff(delay time.Duration) *FixedBackoffBuilder {
 	return &FixedBackoffBuilder{Delay: delay}
 }
 
-/*
-FullJitterBackoffAlgorithm implements caped exponential backoff
-with jitter. Algorithm is fast because it does not use floating
-point arithmetics.
-
-Details:
-https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/
-
- Example (BaseDelay=1, maxDelay=30):
- Call			Delay
- -------      ----------------
- 1            random [0...1]
- 2            random [0...2]
- 3            random [0...4]
- 4            random [0...8]
- 5            random [0...16]
- 6            random [0...30]
- 7            random [0...30]
-
-*/
+// FullJitterBackoffAlgorithm implements caped exponential backoff
+// with jitter. Algorithm is fast because it does not use floating
+// point arithmetics.
+//
+// Details:
+// https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/
+//
+// Example (BaseDelay=1, maxDelay=30):
+// Call			Delay
+// -------      ----------------
+// 1            random [0...1]
+// 2            random [0...2]
+// 3            random [0...4]
+// 4            random [0...8]
+// 5            random [0...16]
+// 6            random [0...30]
+// 7            random [0...30]
+//
 func FullJitterBackoffAlgorithm(baseDelay time.Duration, maxDelay time.Duration) func() time.Duration {
 	rnd := rand.New(rand.NewSource(int64(time.Now().Unix())))
 	delay := baseDelay
@@ -110,21 +108,19 @@ func FullJitterBackoff(baseDelay time.Duration) *FullJitterBackoffBuilder {
 		WithMaxDelay(1<<63 - 1)
 }
 
-/*
-ExponentialBackoffAlgorithm implements classic caped exponential backoff.
-
- Example (initialDelay=1, maxDelay=30, Multiplier=2, Jitter=0.5):
- Attempt		Delay
- -------      --------------------------
- 0             1 + random [-0.5...0.5]
- 1             2 + random [-1...1]
- 2             4 + random [-2...2]
- 3             8 + random [-4...4]
- 4            16 + random [-8...8]
- 5            32 + random [-16...16]
- 6            64 + random [-32...32] = 30
-
-*/
+// ExponentialBackoffAlgorithm implements classic caped exponential backoff.
+//
+// Example (initialDelay=1, maxDelay=30, Multiplier=2, Jitter=0.5):
+// Attempt		Delay
+// -------      --------------------------
+// 0             1 + random [-0.5...0.5]
+// 1             2 + random [-1...1]
+// 2             4 + random [-2...2]
+// 3             8 + random [-4...4]
+// 4            16 + random [-8...8]
+// 5            32 + random [-16...16]
+// 6            64 + random [-32...32] = 30
+//
 func ExponentialBackoffAlgorithm(initialDelay time.Duration, maxDelay time.Duration, multiplier float64, jitter float64) func() time.Duration {
 	rnd := rand.New(rand.NewSource(int64(time.Now().Unix())))
 	nextDelay := float64(initialDelay)
