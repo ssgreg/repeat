@@ -16,6 +16,16 @@ func HintTemporary(e error) error {
 	return &TemporaryError{e}
 }
 
+// IsTemporary checks if passed error is TemporaryError.
+func IsTemporary(e error) bool {
+	switch e.(type) {
+	case *TemporaryError:
+		return true
+	default:
+		return false
+	}
+}
+
 // StopError allows to stop repetition process without specifying a
 // separate error.
 //
@@ -31,6 +41,16 @@ func (e *StopError) Error() string {
 // HintStop makes a StopError.
 func HintStop(e error) error {
 	return &StopError{e}
+}
+
+// IsStop checks if passed error is StopError.
+func IsStop(e error) bool {
+	switch e.(type) {
+	case *StopError:
+		return true
+	default:
+		return false
+	}
 }
 
 // Cause extracts the cause error from TemporaryError and StopError

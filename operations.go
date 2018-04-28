@@ -36,6 +36,17 @@ func FnOnSuccess(op func(error) error) Operation {
 	}
 }
 
+// FnOnError executes operation in case error is NOT nil.
+func FnOnError(op func(error) error) Operation {
+	return func(e error) error {
+		if e == nil {
+			return e
+		}
+
+		return op(e)
+	}
+}
+
 // FnHintTemporary hints all operation errors as temporary.
 func FnHintTemporary(op func(error) error) Operation {
 	return func(e error) error {
