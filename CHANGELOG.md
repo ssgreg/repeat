@@ -19,4 +19,4 @@
 # 1.2
 
 * add: Nope to operations
-* add: new function to create Repeater with constructor and destruction - Cpp
+* add: new function to create Repeater with constructor and destructor - Cpp
