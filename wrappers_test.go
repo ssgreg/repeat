@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	goldenErr = errors.New("golden")
+	errGolden = errors.New("golden")
 )
 
 func TestWrStopOnContextError_CallReturnOp(t *testing.T) {
@@ -23,11 +23,11 @@ func TestWrStopOnContextError_CallReturnOp(t *testing.T) {
 	require.NoError(t, WrStopOnContextError(context.Background())(opNilError)(nil))
 
 	opError := func(e error) error {
-		require.EqualError(t, Cause(e), goldenErr.Error())
+		require.EqualError(t, Cause(e), errGolden.Error())
 		return e
 	}
 
-	require.Error(t, WrStopOnContextError(context.Background())(opError)(HintTemporary(goldenErr)))
+	require.Error(t, WrStopOnContextError(context.Background())(opError)(HintTemporary(errGolden)))
 }
 
 func TestWrStopOnContextError_CancelOp(t *testing.T) {
@@ -51,7 +51,7 @@ func TestWrStopOnContextError_CancelOpWithTemporaryError(t *testing.T) {
 	}
 
 	cancel()
-	require.EqualError(t, WrStopOnContextError(ctx)(op)(HintTemporary(goldenErr)), "golden")
+	require.EqualError(t, WrStopOnContextError(ctx)(op)(HintTemporary(errGolden)), "golden")
 }
 
 func TestWrStopOnContextError_SuccessIfDone(t *testing.T) {
@@ -69,7 +69,7 @@ func TestWrStopOnContextError_SuccessIfDone(t *testing.T) {
 		cancel()
 	}()
 
-	require.NoError(t, WrStopOnContextError(ctx)(op)(HintTemporary(goldenErr)))
+	require.NoError(t, WrStopOnContextError(ctx)(op)(HintTemporary(errGolden)))
 	require.True(t, called)
 }
 

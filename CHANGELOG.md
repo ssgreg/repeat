@@ -12,6 +12,11 @@
 
 # 1.1
 
-* add: IsTemporary and IsStop for errors
-* add: FnOnError for operations
-* add: missing tests for operations
+* add: IsTemporary and IsStop to errors
+* add: FnOnError to operations
+* add: missing tests to operations
+
+# 1.2
+
+* add: Nope to operations
+* add: new function to create Repeater with constructor and destruction - Cpp

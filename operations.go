@@ -86,7 +86,7 @@ func Fn(op func() error) Operation {
 	}
 }
 
-// FnS wrap operation with no arguments and return value.
+// FnS wraps operation with no arguments and return value.
 func FnS(op func()) Operation {
 	return func(e error) error {
 		op()
@@ -94,10 +94,15 @@ func FnS(op func()) Operation {
 	}
 }
 
-// FnES wrap operation with no return value.
+// FnES wraps operation with no return value.
 func FnES(op func(error)) Operation {
 	return func(e error) error {
 		op(e)
 		return e
 	}
+}
+
+// Nope does nothing.
+func Nope(e error) error {
+	return e
 }
