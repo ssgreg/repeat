@@ -6,11 +6,23 @@ var (
 	def = NewRepeater()
 )
 
+// Once composes the operations and executes the result once.
+//
+// It is guaranteed that the first op will be called at least once.
+func Once(ops ...Operation) error {
+	return def.Once(ops...)
+}
+
 // Repeat repeat operations until one of them stops the repetition.
 //
 // It is guaranteed that the first op will be called at least once.
 func Repeat(ops ...Operation) error {
 	return def.Repeat(ops...)
+}
+
+// FnRepeat is a Repeat operation.
+func FnRepeat(ops ...Operation) Operation {
+	return def.FnRepeat(ops...)
 }
 
 // Compose composes all passed operations into a single one.
@@ -28,8 +40,10 @@ func WithContext(ctx context.Context) Repeater {
 
 // Repeater represents general package concept.
 type Repeater interface {
+	Once(...Operation) error
 	Repeat(...Operation) error
 	Compose(...Operation) Operation
+	FnRepeat(...Operation) Operation
 }
 
 type stdRepeater struct {
@@ -55,20 +69,36 @@ func Cpp(c Operation, d Operation) Repeater {
 	return &stdRepeater{Forward, c, d}
 }
 
+// Once composes the operations and executes the result once.
+//
+// It is guaranteed that the first op will be called at least once.
+func (w *stdRepeater) Once(ops ...Operation) error {
+	return Compose(ops...)(nil)
+}
+
 // Repeat repeat operations until one of them stops the repetition.
 //
 // It is guaranteed that the first op will be called at least once.
-func (w *stdRepeater) Repeat(ops ...Operation) (err error) {
-	op := w.Compose(ops...)
-	for {
-		err = op(err)
-		switch e := err.(type) {
-		case nil:
-		case *TemporaryError:
-		case *StopError:
-			return e.Cause
-		default:
-			return e
+func (w *stdRepeater) Repeat(ops ...Operation) error {
+	return w.FnRepeat(ops...)(nil)
+}
+
+// FnRepeat is a Repeat operation.
+func (w *stdRepeater) FnRepeat(ops ...Operation) Operation {
+	return func(e error) (err error) {
+		err = e
+		op := w.Compose(ops...)
+
+		for {
+			err = op(err)
+			switch e := err.(type) {
+			case nil:
+			case *TemporaryError:
+			case *StopError:
+				return e.Cause
+			default:
+				return e
+			}
 		}
 	}
 }

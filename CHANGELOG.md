@@ -20,3 +20,7 @@
 
 * add: Nope to operations
 * add: new function to create Repeater with constructor and destructor - Cpp
+
+# 1.3
+
+* add: Once and FnRepeat to Repeater and global functions
