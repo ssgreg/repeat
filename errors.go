@@ -8,12 +8,17 @@ type TemporaryError struct {
 }
 
 func (e *TemporaryError) Error() string {
-	return e.Cause.Error()
+	r := "repeat.temporary"
+	if e.Cause != nil {
+		r += ": " + e.Cause.Error()
+	}
+
+	return r
 }
 
 // HintTemporary makes a TemporaryError.
 func HintTemporary(e error) error {
-	return &TemporaryError{e}
+	return &TemporaryError{Cause(e)}
 }
 
 // IsTemporary checks if passed error is TemporaryError.
@@ -35,12 +40,17 @@ type StopError struct {
 }
 
 func (e *StopError) Error() string {
-	return e.Cause.Error()
+	r := "repeat.stop"
+	if e.Cause != nil {
+		r += ": " + e.Cause.Error()
+	}
+
+	return r
 }
 
 // HintStop makes a StopError.
 func HintStop(e error) error {
-	return &StopError{e}
+	return &StopError{Cause(e)}
 }
 
 // IsStop checks if passed error is StopError.

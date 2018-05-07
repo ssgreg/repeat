@@ -39,10 +39,10 @@ func TestWrStopOnContextError_CancelOp(t *testing.T) {
 	}
 
 	cancel()
-	require.EqualError(t, WrStopOnContextError(ctx)(op)(nil), "context canceled")
+	require.EqualError(t, WrStopOnContextError(ctx)(op)(nil), "repeat.stop: context canceled")
 }
 
-func TestWrStopOnContextError_CancelOpWithTemporaryError(t *testing.T) {
+func TestWrStopOnContextError_CancelOpWithError(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	op := func(e error) error {
@@ -51,7 +51,9 @@ func TestWrStopOnContextError_CancelOpWithTemporaryError(t *testing.T) {
 	}
 
 	cancel()
-	require.EqualError(t, WrStopOnContextError(ctx)(op)(HintTemporary(errGolden)), "golden")
+	require.EqualError(t, WrStopOnContextError(ctx)(op)(HintTemporary(errGolden)), "repeat.stop: golden")
+	require.EqualError(t, WrStopOnContextError(ctx)(op)(HintStop(errGolden)), "repeat.stop: golden")
+	require.EqualError(t, WrStopOnContextError(ctx)(op)(errGolden), "golden")
 }
 
 func TestWrStopOnContextError_SuccessIfDone(t *testing.T) {

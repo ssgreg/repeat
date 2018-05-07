@@ -1,6 +1,8 @@
 package repeat
 
-import "context"
+import (
+	"context"
+)
 
 var (
 	def = NewRepeater()
@@ -54,50 +56,54 @@ type stdRepeater struct {
 
 // NewRepeater sets up everything to be able to repeat operations.
 func NewRepeater() Repeater {
-	return &stdRepeater{Forward, Nope, Nope}
+	return &stdRepeater{Forward, Done, Done}
 }
 
 // Wrap returns object that wraps all repeating ops with passed OpWrapper.
 func Wrap(wop OpWrapper) Repeater {
-	return &stdRepeater{wop, Nope, Nope}
+	return &stdRepeater{wop, Done, Done}
 }
 
-// Cpp returns object that calls `c` (constructor) at first, then ops,
-// then `d`` (destructor). `D` will be called in any case if `c`
-// is successfull.
+// Cpp returns object that calls C (constructor) at first, then ops,
+// then D (destructor). D will be called in any case if C returns nil.
+//
+// Note! Cpp panics if D returns non nil error. Wrap it using Done if
+// you log D's error or handle it somehow else.
+//
 func Cpp(c Operation, d Operation) Repeater {
-	return &stdRepeater{Forward, c, d}
+	return &stdRepeater{Forward, c, FnPanic(d)}
 }
 
 // Once composes the operations and executes the result once.
 //
 // It is guaranteed that the first op will be called at least once.
 func (w *stdRepeater) Once(ops ...Operation) error {
-	return Compose(ops...)(nil)
+	return Cause(w.Compose(ops...)(nil))
 }
 
 // Repeat repeat operations until one of them stops the repetition.
 //
 // It is guaranteed that the first op will be called at least once.
 func (w *stdRepeater) Repeat(ops ...Operation) error {
-	return w.FnRepeat(ops...)(nil)
+	return Cause(w.FnRepeat(ops...)(nil))
 }
 
 // FnRepeat is a Repeat operation.
 func (w *stdRepeater) FnRepeat(ops ...Operation) Operation {
 	return func(e error) (err error) {
-		err = e
 		op := w.Compose(ops...)
 
 		for {
-			err = op(err)
-			switch e := err.(type) {
+			err = op(e)
+			switch err.(type) {
 			case nil:
+				e = nil
 			case *TemporaryError:
+				e = err
 			case *StopError:
-				return e.Cause
+				return err
 			default:
-				return e
+				return err
 			}
 		}
 	}
@@ -108,28 +114,34 @@ func (w *stdRepeater) FnRepeat(ops ...Operation) Operation {
 func (w *stdRepeater) Compose(ops ...Operation) Operation {
 	return func(e error) (err error) {
 		err = w.c(e)
-		switch e := err.(type) {
-		case nil:
-		case *TemporaryError:
-		case *StopError:
-			return e
-		default:
-			return e
+		if err != nil {
+			// If C failed with temporary error, stop error or any other
+			// error: stop compose with this error.
+			return err
 		}
-		defer func() { err = w.d(err) }()
+		defer func() {
+			// Note: handle error using D wrapper.
+			_ = w.d(err)
+		}()
 
 		for _, op := range ops {
-			err = w.wop(op)(err)
-			switch e := err.(type) {
+			err = w.wop(op)(e)
+			switch err.(type) {
+			// Replace last E with nil.
 			case nil:
+				e = nil
+			// Replace last E with new temporary error.
 			case *TemporaryError:
+				e = err
+			// Stop.
 			case *StopError:
-				return e
+				return err
+			// Stop.
 			default:
-				return e
+				return err
 			}
 		}
 
-		return err
+		return e
 	}
 }

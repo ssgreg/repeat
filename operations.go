@@ -10,7 +10,7 @@ func LimitMaxTries(max int) Operation {
 			return e
 		}
 
-		return &StopError{e}
+		return HintStop(e)
 	})
 }
 
@@ -21,12 +21,12 @@ func StopOnSuccess() Operation {
 			return e
 		}
 
-		return &StopError{e}
+		return HintStop(e)
 	}
 }
 
 // FnOnSuccess executes operation in case of error is nil.
-func FnOnSuccess(op func(error) error) Operation {
+func FnOnSuccess(op Operation) Operation {
 	return func(e error) error {
 		if e != nil {
 			return e
@@ -37,7 +37,7 @@ func FnOnSuccess(op func(error) error) Operation {
 }
 
 // FnOnError executes operation in case error is NOT nil.
-func FnOnError(op func(error) error) Operation {
+func FnOnError(op Operation) Operation {
 	return func(e error) error {
 		if e == nil {
 			return e
@@ -48,7 +48,7 @@ func FnOnError(op func(error) error) Operation {
 }
 
 // FnHintTemporary hints all operation errors as temporary.
-func FnHintTemporary(op func(error) error) Operation {
+func FnHintTemporary(op Operation) Operation {
 	return func(e error) error {
 		err := op(e)
 		switch err.(type) {
@@ -57,6 +57,38 @@ func FnHintTemporary(op func(error) error) Operation {
 		case *StopError:
 		default:
 			err = HintTemporary(err)
+		}
+
+		return err
+	}
+}
+
+// FnHintStop hints all operation errors as StopError.
+func FnHintStop(op Operation) Operation {
+	return func(e error) error {
+		err := op(e)
+		switch err.(type) {
+		case *TemporaryError:
+		case *StopError:
+		default:
+			err = HintStop(err)
+		}
+
+		return err
+	}
+}
+
+// FnPanic panics if op returns any error other than nil, TemporaryError
+// and StopError.
+func FnPanic(op Operation) Operation {
+	return func(e error) error {
+		err := op(e)
+		switch err.(type) {
+		case nil:
+		case *TemporaryError:
+		case *StopError:
+		default:
+			panic(err)
 		}
 
 		return err
@@ -102,7 +134,39 @@ func FnES(op func(error)) Operation {
 	}
 }
 
-// Nope does nothing.
+// Nope does nothing, returns input error.
 func Nope(e error) error {
 	return e
+}
+
+// FnNope does not call pass op, returns input error.
+func FnNope(op Operation) Operation {
+	return func(e error) error {
+		return Nope(e)
+	}
+}
+
+// Done does nothing, returns nil.
+func Done(e error) error {
+	return nil
+}
+
+// FnDone returns nil even if wrapped op returns an error.
+func FnDone(op Operation) Operation {
+	return func(e error) error {
+		return Done(op(e))
+	}
+}
+
+// FnOnlyOnce executes op only once permanently.
+func FnOnlyOnce(op Operation) Operation {
+	once := false
+	return func(e error) error {
+		if once {
+			return e
+		}
+
+		once = true
+		return op(e)
+	}
 }

@@ -14,13 +14,13 @@ func WrStopOnContextError(ctx context.Context) OpWrapper {
 			if ctx.Err() != nil {
 				switch e.(type) {
 				case nil:
-					return &StopError{ctx.Err()}
+					return HintStop(ctx.Err())
 				case *StopError:
 					return e
 				case *TemporaryError:
-					return &StopError{Cause(e)}
+					return HintStop(e)
 				default:
-					return &StopError{e}
+					return e
 				}
 			}
 
