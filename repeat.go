@@ -95,13 +95,18 @@ func (w *stdRepeater) FnRepeat(ops ...Operation) Operation {
 
 		for {
 			err = op(e)
-			switch err.(type) {
+			switch typedError := err.(type) {
 			case nil:
 				e = nil
 			case *TemporaryError:
 				e = err
 			case *StopError:
-				return err
+				switch typedError.Cause {
+				case nil:
+					return nil
+				default:
+					return err
+				}
 			default:
 				return err
 			}

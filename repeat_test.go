@@ -74,13 +74,13 @@ func TestOnce_ErrOut(t *testing.T) {
 }
 
 func TestFnRepeat_NilInStopErrWithNilOut(t *testing.T) {
-	require.EqualError(t, FnRepeat(
+	require.NoError(t, FnRepeat(
 		func(e error) error {
 			require.NoError(t, e)
 			return e
 		},
 		StopOnSuccess(),
-	)(nil), "repeat.stop")
+	)(nil))
 }
 
 func TestFnRepeat_ErrInErrOut(t *testing.T) {
