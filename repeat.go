@@ -49,19 +49,26 @@ type Repeater interface {
 }
 
 type stdRepeater struct {
-	wop OpWrapper
-	c   Operation
-	d   Operation
+	wop  OpWrapper
+	woop OpWrapper
+	c    Operation
+	d    Operation
 }
 
 // NewRepeater sets up everything to be able to repeat operations.
 func NewRepeater() Repeater {
-	return &stdRepeater{Forward, Done, Done}
+	return &stdRepeater{Forward, Forward, Done, Done}
 }
 
 // Wrap returns object that wraps all repeating ops with passed OpWrapper.
 func Wrap(wop OpWrapper) Repeater {
-	return &stdRepeater{wop, Done, Done}
+	return &stdRepeater{wop, Forward, Done, Done}
+}
+
+// WrapOnce returns object that wraps all repeating ops combined into a single op
+// with passed OpWrapper calling it once.
+func WrapOnce(wop OpWrapper) Repeater {
+	return &stdRepeater{Forward, wop, Done, Done}
 }
 
 // Cpp returns object that calls C (constructor) at first, then ops,
@@ -71,7 +78,7 @@ func Wrap(wop OpWrapper) Repeater {
 // you log D's error or handle it somehow else.
 //
 func Cpp(c Operation, d Operation) Repeater {
-	return &stdRepeater{Forward, c, FnPanic(d)}
+	return &stdRepeater{Forward, Forward, c, FnPanic(d)}
 }
 
 // Once composes the operations and executes the result once.
@@ -117,7 +124,7 @@ func (w *stdRepeater) FnRepeat(ops ...Operation) Operation {
 // Compose wraps ops with wop and composes all passed operations info
 // a single one.
 func (w *stdRepeater) Compose(ops ...Operation) Operation {
-	return func(e error) (err error) {
+	return w.woop(func(e error) (err error) {
 		err = w.c(e)
 		if err != nil {
 			// If C failed with temporary error, stop error or any other
@@ -148,5 +155,5 @@ func (w *stdRepeater) Compose(ops ...Operation) Operation {
 		}
 
 		return e
-	}
+	})
 }
