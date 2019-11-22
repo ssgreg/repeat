@@ -23,6 +23,14 @@ func SetContext(ctx context.Context) func(*DelayOptions) {
 	}
 }
 
+// SetContextHintStop instructs to use HintStop(nil)
+// instead of context error in case of context expiration.
+func SetContextHintStop() func(*DelayOptions) {
+	return func(do *DelayOptions) {
+		do.ContextHintStop = true
+	}
+}
+
 // WithDelay constructs HeartbeatPredicate.
 func WithDelay(options ...func(hb *DelayOptions)) Operation {
 	do := applyOptions(applyOptions(&DelayOptions{}, defaultOptions()), options)
@@ -47,6 +55,10 @@ func WithDelay(options ...func(hb *DelayOptions)) Operation {
 		select {
 		case <-do.Context.Done():
 			// Let out caller know that the op is cancelled.
+			if do.ContextHintStop {
+				return HintStop(nil)
+			}
+
 			return do.Context.Err()
 
 		case <-deadlineT.C:
@@ -62,9 +74,10 @@ func WithDelay(options ...func(hb *DelayOptions)) Operation {
 
 // DelayOptions holds parameters for a heartbeat process.
 type DelayOptions struct {
-	ErrorsTimeout time.Duration
-	Backoff       func() time.Duration
-	Context       context.Context
+	ErrorsTimeout   time.Duration
+	Backoff         func() time.Duration
+	Context         context.Context
+	ContextHintStop bool
 }
 
 func defaultOptions() []func(hb *DelayOptions) {
