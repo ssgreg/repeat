@@ -76,13 +76,12 @@ func TestExponentialBackoff(t *testing.T) {
 	ExponentialBackoff(354 * time.Millisecond).WithJitter(.9).WithMultiplier(1.12).WithMaxDelay(5 * time.Second).Set()(do)
 
 	initDelay := float64(354 * time.Millisecond)
-	for i := 0; i < 30; i++ {
-		c := math.Pow(1.12, float64(i))
-		fi := .9 * c
-		max := time.Duration((c + fi) * initDelay)
-		if max > 5*time.Second {
-			max = 5 * time.Second
+	for i := 0; i < 300; i++ {
+		c := math.Pow(1.12, float64(i)) * initDelay
+		if c > float64(5*time.Second) {
+			c = float64(5 * time.Second)
 		}
-		InRange(t, do.Backoff(), time.Duration((c-fi)*initDelay), max)
+		fi := .9 * c
+		InRange(t, do.Backoff(), time.Duration(c-fi), time.Duration(c+fi))
 	}
 }
