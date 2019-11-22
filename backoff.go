@@ -1,6 +1,7 @@
 package repeat
 
 import (
+	"fmt"
 	"math/rand"
 	"time"
 )
@@ -128,16 +129,15 @@ func ExponentialBackoffAlgorithm(initialDelay time.Duration, maxDelay time.Durat
 
 	return func() time.Duration {
 		delay := nextDelay
-		nextDelay = nextDelay * multiplier
+		if nextDelay < limit {
+			nextDelay = nextDelay * multiplier
+		}
+		if nextDelay > limit {
+			nextDelay = limit
+		}
 
 		// Fix delay according to jitter.
-		delta := delay * jitter
-		delay = delay - delta + (2 * delta * rnd.Float64())
-
-		// Fix delay limits.
-		if delay > limit {
-			delay = limit
-		}
+		delay += delay * jitter * (2*rnd.Float64() - 1)
 
 		return time.Duration(delay)
 	}
@@ -207,6 +207,10 @@ func (s *ExponentialBackoffBuilder) WithMultiplier(m float64) *ExponentialBackof
 //
 // Default value is 0.
 func (s *ExponentialBackoffBuilder) WithJitter(j float64) *ExponentialBackoffBuilder {
+	if j < 0 || j > 1 {
+		panic(fmt.Sprintf(`repeat: jitter "%f" should in range [0..1]`, j))
+	}
+
 	s.Jitter = j
 	return s
 }

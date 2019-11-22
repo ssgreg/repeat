@@ -80,9 +80,6 @@ func TestExponentialBackoff(t *testing.T) {
 		c := math.Pow(1.12, float64(i))
 		fi := .9 * c
 		max := time.Duration((c + fi) * initDelay)
-		if max > 5*time.Second {
-			max = 5 * time.Second
-		}
 		InRange(t, do.Backoff(), time.Duration((c-fi)*initDelay), max)
 	}
 }
