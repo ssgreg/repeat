@@ -307,6 +307,81 @@ func TestCpp_TransparentC(t *testing.T) {
 	require.Equal(t, 3, c)
 }
 
+func TestWith_C_D(t *testing.T) {
+	c := 0
+
+	cd := func(e error) error {
+		c++
+		return e
+	}
+
+	require.NoError(t, With(cd, cd).Compose(Nope)(nil))
+	require.Equal(t, 2, c)
+}
+
+func TestWith_C_NoD(t *testing.T) {
+	c := 0
+
+	cd := func(e error) error {
+		c++
+		return e
+	}
+
+	require.EqualError(t, Cpp(cd, cd).Compose(Nope)(errGolden), errGolden.Error())
+	require.Equal(t, 1, c)
+}
+
+func TestWith_C_PanicOP_D(t *testing.T) {
+	c := 0
+
+	cd := func(e error) error {
+		c++
+		return e
+	}
+
+	errOp := func(error) error {
+		panic(errGolden)
+	}
+
+	require.Panics(t, func() {
+		With(cd, cd).Compose(errOp)(nil)
+	})
+	require.Equal(t, 2, c)
+}
+
+func TestWith_C_ErrOP_DoneD(t *testing.T) {
+	c := 0
+
+	cd := func(e error) error {
+		c++
+		return e
+	}
+
+	errOp := func(error) error {
+		return errGolden
+	}
+
+	require.NoError(t, With(cd, FnDone(cd)).Compose(errOp)(nil))
+	require.Equal(t, 2, c)
+}
+
+func TestWith_C_DoneOP_ErrD(t *testing.T) {
+	counter := 0
+
+	c := func(e error) error {
+		counter++
+		return e
+	}
+
+	d := func(error) error {
+		counter++
+		return errGolden
+	}
+
+	require.EqualError(t, With(c, d).Compose(Nope)(nil), errGolden.Error())
+	require.Equal(t, 2, counter)
+}
+
 func TestRepeatWithContext(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
