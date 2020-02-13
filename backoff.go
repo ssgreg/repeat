@@ -50,7 +50,7 @@ func FixedBackoff(delay time.Duration) *FixedBackoffBuilder {
 // 7            random [0...30]
 //
 func FullJitterBackoffAlgorithm(baseDelay time.Duration, maxDelay time.Duration) func() time.Duration {
-	rnd := rand.New(rand.NewSource(int64(time.Now().Unix())))
+	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 	delay := baseDelay
 
 	return func() time.Duration {
@@ -123,7 +123,7 @@ func FullJitterBackoff(baseDelay time.Duration) *FullJitterBackoffBuilder {
 // 6            64 + random [-32...32] = 30
 //
 func ExponentialBackoffAlgorithm(initialDelay time.Duration, maxDelay time.Duration, multiplier float64, jitter float64) func() time.Duration {
-	rnd := rand.New(rand.NewSource(int64(time.Now().Unix())))
+	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 	nextDelay := float64(initialDelay)
 	limit := float64(maxDelay)
 
